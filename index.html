@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .header h1 {
+            font-size: 36px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 18px;
+            border: 1px solid #334155;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: 2px solid #6366f1;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #6366f1;
+            color: white;
+            font-size: 15px;
+        }
+
+        button:hover .quiz-option.correct {
+    background: #16a34a;
+}
+
+.quiz-option.wrong {
+    background: #dc2626;
+} {
+            opacity: 0.85;
+        }
+
+        .answer {
+            margin-top: 25px;
+            padding: 20px;
+            min-height: 120px;
+            border-radius: 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            white-space: pre-wrap;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid #334155;
+        }
+
+        .feature h3 {
+            margin-bottom: 8px;
+        }
+
+        .feature p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🤖 StudyBuddy AI</h1>
+        <p>Your personal AI study companion</p>
+    </div>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>Ask your question 🧠</h2>
+
+            <textarea
+                id="question"
+                placeholder="Example: Explain Newton's laws in simple Hindi..."></textarea>
+
+            <div class="buttons">
+                <button onclick="askAI()">🚀 Ask AI</button>
+                <button onclick="setMode('Explain Concept')">💡 Explain Concept</button>
+                <button onclick="setMode('Generate MCQs')">❓ Generate MCQs</button>
+                <button onclick="setMode('Short Notes')">📝 Short Notes</button>
+            </div>
+
+            <div class="answer" id="answer">
+                AI ka answer yahan dikhega...
+            </div>
+
+        </div>
+
+        <div class="features">
+
+            <div class="feature">
+                <h3>📚 NEET Mode</h3>
+                <p>NEET-focused learning and revision.</p>
+            </div>
+
+            <div class="feature">
+                <h3>🧠 Smart Explanation</h3>
+                <p>Concepts ko simple language mein samjho.</p>
+            </div>
+
+            <div class="feature">
+                <h3>❓ MCQ Generator</h3>
+                <p>Practice questions generate karo.</p>
+            </div>
+
+            <div class="feature">
+                <h3>📝 Quick Notes</h3>
+                <p>Long topics ko short notes mein convert karo.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <footer>
+        StudyBuddy AI • Built for learning 🚀
+    </footer>
+
+ ```html
+<script>
+
+let selectedMode = "Ask AI";
+let score = 0;
+let answered = 0;
+
+function setMode(mode) {
+    selectedMode = mode;
+
+    document.getElementById("question").value = "";
+
+    document.getElementById("question").placeholder =
+        mode + " ke liye topic likho...";
+
+    document.getElementById("question").focus();
+}
+
+async function askAI() {
+
+    const question =
+        document.getElementById("question").value.trim();
+
+    if (question === "") {
+        alert("Pehle topic ya question likho!");
+        return;
+    }
+
+    document.getElementById("answer").innerText =
+        "🤖 StudyBuddy soch raha hai...";
+
+    try {
+
+        const response = await fetch("/api/ask", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                question: selectedMode + ": " + question
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.quiz) {
+
+            score = 0;
+            answered = 0;
+
+            let output = "";
+
+            data.quiz.forEach((q, index) => {
+
+                output += `<div class="quiz-question">`;
+
+                output += `<h3>Q${index + 1}. ${q.question}</h3>`;
+
+                q.options.forEach((option, optionIndex) => {
+
+                    output += `
+                        <button
+                            class="quiz-option"
+                            onclick="checkAnswer(${index}, ${optionIndex}, '${q.answer}')">
+                            ${option}
+                        </button>
+                    `;
+                });
+
+                output += `</div>`;
+            });
+
+            document.getElementById("answer").innerHTML = output;
+
+        } else {
+
+            document.getElementById("answer").innerText =
+                data.answer;
+        }
+
+    } catch (error) {
+
+        document.getElementById("answer").innerText =
+            "❌ Error: " + error.message;
+    }
+}
+
+function checkAnswer(questionIndex, selectedIndex, correctAnswer) {
+
+    const buttons = document.querySelectorAll(".quiz-option");
+
+    const start = questionIndex * 4;
+
+    const selectedButton =
+        buttons[start + selectedIndex];
+
+    const selectedLetter =
+        String.fromCharCode(65 + selectedIndex);
+
+    if (selectedLetter === correctAnswer) {
+
+        score++;
+
+        selectedButton.innerText += " ✅ Correct!";
+        selectedButton.classList.add("correct");
+
+    } else {
+
+        selectedButton.innerText += " ❌ Wrong!";
+        selectedButton.classList.add("wrong");
+    }
+
+    answered++;
+
+    for (let i = start; i < start + 4; i++) {
+        buttons[i].disabled = true;
+    }
+
+    if (answered === 5) {
+
+    document.getElementById("answer").innerHTML +=
+        `<h2>🎯 Quiz Complete!</h2>
+         <h2>Score: ${score}/5</h2>`;
+} {
+
+        document.getElementById("answer").innerHTML +=
+            `<h2>🎯 Quiz Complete!</h2>
+             <h2>Score: ${score}/5</h2>`;
+    }
+}
+function tryAgain() {
+
+    score = 0;
+    answered = 0;
+
+    askAI();
+}
+</script>
+
+</body>
+</html>
